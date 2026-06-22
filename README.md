@@ -1,1 +1,15 @@
-# reviewdog-action-template
+# reviewdog/action-template
+
+TODO: 🐶 Run <linter-name> with reviewdog on pull requests to improve code review experience.
+
+Hardened by [Chainguard](https://www.chainguard.dev) from the upstream action at [https://github.com/reviewdog/action-template](https://github.com/reviewdog/action-template).
+
+## Versions
+
+| Version | Tag | Upstream commit |
+|---------|-----|-----------------|
+| v1.21.2 | [`v1.21.2`](https://github.com/chainguard-actions/reviewdog-action-template/tree/v1.21.2) | [`e3f26e1`](https://github.com/reviewdog/action-template/commit/e3f26e1ff1f68c09bc569a5b215d05b3d6ff82a2) |
+
+## Privacy
+
+This Action contacts Chainguard's licensing server to verify authorization. Connection metadata (IP address, GitHub repository identifier, timestamp, and any metadata encoded in the auth token) is transmitted to Chainguard, Inc. even if authorization is denied in accordance with our [Privacy Notice](https://www.chainguard.dev/legal/privacy-notice)
