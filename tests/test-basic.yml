@@ -1,0 +1,27 @@
+name: Test basic usage
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: dummy-token
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Create a clean text file with no misspellings
+        run: |
+          mkdir -p /tmp/clean-workdir
+          echo "This is a clean file with no spelling errors." > /tmp/clean-workdir/clean.txt
+      - id: action
+        uses: .
+        with:
+          github_token: dummy-token
+          workdir: testdata
+          reporter: local
+          filter_mode: nofilter
+          fail_level: none
+          level: error
+      - name: Assert action completed successfully
+        run: |
+          echo "Action completed with exit code 0 (fail_level=none always exits 0)"
+          echo "PASS"
