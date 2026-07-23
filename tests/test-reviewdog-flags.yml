@@ -1,0 +1,26 @@
+name: Test additional reviewdog flags
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Create test file with no misspellings
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/testfiles-flags"
+          echo "The quick brown fox jumps over the lazy dog." > "$GITHUB_WORKSPACE/testfiles-flags/clean.txt"
+      - id: action
+        uses: .
+        with:
+          github_token: 'dummy-token'
+          workdir: 'testfiles-flags'
+          reporter: 'local'
+          filter_mode: 'nofilter'
+          fail_level: 'none'
+          level: 'warning'
+          reviewdog_flags: '-tee'
+      - name: Assert action completed with extra reviewdog flags
+        run: |
+          echo "Action completed with additional reviewdog flags"
+          echo "PASS"

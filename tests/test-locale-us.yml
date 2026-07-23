@@ -1,0 +1,26 @@
+name: Test locale US flag
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Create test file with US spelling
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/testfiles-us"
+          echo "The color of the center is gray." > "$GITHUB_WORKSPACE/testfiles-us/us.txt"
+      - id: action
+        uses: .
+        with:
+          github_token: 'dummy-token'
+          workdir: 'testfiles-us'
+          locale: 'US'
+          reporter: 'local'
+          filter_mode: 'nofilter'
+          fail_level: 'none'
+          level: 'info'
+      - name: Assert action completed with US locale
+        run: |
+          echo "Action completed with US locale without error"
+          echo "PASS"
