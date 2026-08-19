@@ -15,4 +15,4 @@ misspell -locale="${INPUT_LOCALE}" . \
       -filter-mode="${INPUT_FILTER_MODE}" \
       -fail-level="${INPUT_FAIL_LEVEL}" \
       -level="${INPUT_LEVEL}" \
-      ${INPUT_REVIEWDOG_FLAGS}
+      ${INPUT_REVIEWDOG_FLAGS:+"${INPUT_REVIEWDOG_FLAGS}"}

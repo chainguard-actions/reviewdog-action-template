@@ -8,30 +8,78 @@
 
 **Test Policy SHA:** `843adf9e4b8f85d0c08b27b9d0b09dd094b54702`
 
-**Harden Agent Version:** `1`
+**Harden Agent Version:** `2`
 
-Action **reviewdog--action-template/v1.21.3** was hardened automatically. 1 finding(s) were identified and resolved across 1 iteration(s).
+Action **reviewdog--action-template/v1.21.3** was hardened automatically. 7 finding(s) were identified and resolved across 1 iteration(s).
 
 ## Findings Fixed
 
-### unsafe-shell (severity: high)
+### script-injection (severity: high)
 
-The Dockerfile (referenced directly from action.yml via `image: 'Dockerfile'`) pipes remote content directly to a shell interpreter in two RUN steps. Line 9: `wget -O - -q https://raw.githubusercontent.com/reviewdog/reviewdog/.../install.sh | sh -s -- ...` and Line 12: `wget -O - -q https://git.io/misspell | sh -s -- ...`. An attacker who can intercept or tamper with the remote URL (e.g. via a compromised CDN, DNS hijack, or a redirect from the URL shortener git.io) can execute arbitrary code during the Docker image build. The script should be downloaded to a file, its checksum verified, and then executed separately.
+Sub-rule (a): The `run:` block in the 'Build the Docker image' step directly interpolates the GitHub Actions expression `${{ github.repository }}` into a shell command string: `docker build . --file Dockerfile --tag ${{ github.repository }}:$(date +%s)`. This expression is substituted by the Actions runner before the shell ever sees the command, allowing an attacker who controls the repository name to inject arbitrary shell commands.
 
 Locations:
 
-- `Dockerfile:9`
-- `Dockerfile:12`
+- `.github/workflows/dockerimage.yml:12`
+
+### script-injection (severity: high)
+
+Sub-rule (b): In entrypoint.sh, the shell variable `${INPUT_REVIEWDOG_FLAGS}` (sourced from `inputs.reviewdog_flags`, a workflow-controlled value) is expanded **unquoted** as a positional argument to the `reviewdog` command on the final line: `${INPUT_REVIEWDOG_FLAGS}`. Without double-quoting, the shell parses metacharacters (`;`, `|`, `&`, `$(...)`, whitespace, glob chars) from the value, enabling command injection by any caller of this action. It should be `"${INPUT_REVIEWDOG_FLAGS}"` or use the guarded form `${INPUT_REVIEWDOG_FLAGS:+"$INPUT_REVIEWDOG_FLAGS"}`.
+
+Locations:
+
+- `entrypoint.sh:18`
+
+### missing-permissions (severity: medium)
+
+The workflow file has no top-level `permissions:` key and none of its jobs define a `permissions:` block. Without explicit permissions, the GITHUB_TOKEN is granted its default (often broad) permissions, violating the principle of least privilege.
+
+Locations:
+
+- `.github/workflows/depup.yml:1`
+
+### missing-permissions (severity: medium)
+
+The workflow file has no top-level `permissions:` key and none of its jobs define a `permissions:` block. Without explicit permissions, the GITHUB_TOKEN is granted its default (often broad) permissions, violating the principle of least privilege.
+
+Locations:
+
+- `.github/workflows/dockerimage.yml:1`
+
+### missing-permissions (severity: medium)
+
+The workflow file has no top-level `permissions:` key and none of its jobs define a `permissions:` block. Without explicit permissions, the GITHUB_TOKEN is granted its default (often broad) permissions, violating the principle of least privilege.
+
+Locations:
+
+- `.github/workflows/release.yml:1`
+
+### missing-permissions (severity: medium)
+
+The workflow file has no top-level `permissions:` key and none of its jobs define a `permissions:` block. Without explicit permissions, the GITHUB_TOKEN is granted its default (often broad) permissions, violating the principle of least privilege.
+
+Locations:
+
+- `.github/workflows/reviewdog.yml:1`
+
+### missing-permissions (severity: medium)
+
+The workflow file has no top-level `permissions:` key and none of its jobs define a `permissions:` block. Without explicit permissions, the GITHUB_TOKEN is granted its default (often broad) permissions, violating the principle of least privilege.
+
+Locations:
+
+- `.github/workflows/test.yml:1`
 
 ## Iteration Notes
 
 ### Iteration 1
 
-**Fixes applied:** unsafe-shell
+**Fixes applied:** script-injection, missing-permissions
 
 **Notes:**
 
-Fixed both unsafe pipe-to-shell patterns in the Dockerfile:
-1. Line 9 (reviewdog): Changed `wget -O - -q <url> | sh -s -- ...` to download the script to /tmp/install-reviewdog.sh first, then execute with `sh`, then remove. The URL remains pinned to commit SHA fd59714416d6d9a1c0692d872e38e7f8448df4fc.
-2. Line 12 (misspell): Changed `wget -O - -q https://git.io/misspell | sh -s -- ...` to use the direct GitHub raw URL (eliminating the git.io URL shortener), download to /tmp/install-misspell.sh, execute with `sh`, then remove. Both changes eliminate the unsafe wget|sh pipe-to-shell pattern.
+Fixed 7 findings across 6 files:
+1. dockerimage.yml: Moved `${{ github.repository }}` to an env: block (REPOSITORY) and referenced it as "${REPOSITORY}" in the shell run command to prevent script injection. Also added `permissions: {}` top-level block.
+2. entrypoint.sh: Changed unquoted `${INPUT_REVIEWDOG_FLAGS}` to the guarded form `${INPUT_REVIEWDOG_FLAGS:+"${INPUT_REVIEWDOG_FLAGS}"}` to prevent shell metacharacter injection while preserving optional-argument semantics.
+3. depup.yml, release.yml, reviewdog.yml, test.yml: Added `permissions: {}` top-level block to each workflow to enforce least privilege instead of relying on broad default GITHUB_TOKEN permissions.
 
