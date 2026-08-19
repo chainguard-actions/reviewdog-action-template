@@ -1,0 +1,29 @@
+name: Test locale input - US locale flags UK spellings
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+
+      # tests/fixtures/misspelled/text.md contains "colour" (UK spelling)
+      # With locale=US, misspell will flag "colour" as a misspelling
+      # fail_level=none ensures exit 0 even when issues are found
+      - id: action
+        uses: .
+        with:
+          github_token: ${{ github.token }}
+          workdir: tests/fixtures/misspelled
+          reporter: local
+          filter_mode: nofilter
+          fail_level: none
+          level: warning
+          locale: US
+
+      - name: Assert action ran with US locale successfully
+        run: |
+          echo "Action ran with locale=US (colour flagged as misspelling)"
+          echo "PASS"

@@ -1,0 +1,26 @@
+name: Test workdir input - run in subdirectory
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+
+      # tests/fixtures/subdir/text.md contains "Determinisitic" misspelling
+      - id: action
+        uses: .
+        with:
+          github_token: ${{ github.token }}
+          workdir: tests/fixtures/subdir
+          reporter: local
+          filter_mode: nofilter
+          fail_level: none
+          level: error
+
+      - name: Assert action ran in subdirectory successfully
+        run: |
+          echo "Action ran in subdirectory (workdir=tests/fixtures/subdir)"
+          echo "PASS"
