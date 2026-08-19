@@ -1,4 +1,4 @@
-name: Test basic usage
+name: Test fail_level none
 on:
   workflow_dispatch:
 jobs:
@@ -6,7 +6,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - name: Run action with basic inputs
+      - name: Run action with fail_level=none (should always succeed even with findings)
         id: action
         uses: .
         with:
@@ -15,8 +15,8 @@ jobs:
           reporter: local
           filter_mode: nofilter
           fail_level: none
-          level: warning
-      - name: Assert action completed successfully
+          level: error
+      - name: Assert action exited 0 with fail_level=none despite misspellings
         run: |
-          echo "Action completed without error"
+          echo "Action completed with exit code 0 as expected (fail_level=none)"
           echo "PASS"

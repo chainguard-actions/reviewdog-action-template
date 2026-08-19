@@ -1,4 +1,4 @@
-name: Test additional reviewdog flags
+name: Test reviewdog_flags input
 on:
   workflow_dispatch:
 jobs:
@@ -6,18 +6,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - name: Run action with additional reviewdog flags (-tee)
+      - name: Run action with additional reviewdog flags (-tee prints to stdout)
         id: action
         uses: .
         with:
-          github_token: dummy-token
-          workdir: testdata
+          github_token: ${{ github.token }}
+          workdir: tests/fixtures
           reporter: local
           filter_mode: nofilter
           fail_level: none
-          level: error
-          reviewdog_flags: "-tee"
-      - name: Assert action completed successfully with extra reviewdog flags
+          level: warning
+          reviewdog_flags: '-tee'
+      - name: Assert action completed with reviewdog_flags
         run: |
-          echo "Action completed successfully with reviewdog_flags=-tee"
+          echo "Action completed with reviewdog_flags=-tee"
           echo "PASS"

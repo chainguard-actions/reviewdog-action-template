@@ -1,4 +1,4 @@
-name: Test basic usage
+name: Test locale input
 on:
   workflow_dispatch:
 jobs:
@@ -6,8 +6,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - name: Run action with basic inputs
-        id: action
+      - name: Run action with UK locale (colour is correct in UK English)
+        id: action-uk
         uses: .
         with:
           github_token: ${{ github.token }}
@@ -16,7 +16,8 @@ jobs:
           filter_mode: nofilter
           fail_level: none
           level: warning
-      - name: Assert action completed successfully
+          locale: UK
+      - name: Assert action completed with UK locale
         run: |
-          echo "Action completed without error"
+          echo "Action completed with locale=UK"
           echo "PASS"
